@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -26,6 +27,10 @@ func Get(url string, headers map[string]string) string {
 
 	// 发送HTTP请求
 	resp, err := client.Do(req)
+	if resp.StatusCode != 200 {
+		fmt.Println("http get code : " + strconv.Itoa(resp.StatusCode))
+		return ""
+	}
 	if err != nil {
 		fmt.Println(err)
 		return ""

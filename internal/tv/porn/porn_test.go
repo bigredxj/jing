@@ -1,7 +1,6 @@
 package porn
 
 import (
-	"fmt"
 	"jing/internal/config"
 	"testing"
 )
@@ -19,9 +18,10 @@ func TestCaoliuHttp(t *testing.T) {
 		Heads:            headers,
 		DownloadNumLimit: 1000,
 	}
-	result := CaoliuSearch(tv)
-	for _, r := range result {
-		fmt.Println(r)
-	}
+	CaoliuSearch(tv)
 
+}
+
+func TestGetDownLoadFromFile(t *testing.T) {
+	GetDownLoadFromFile()
 }

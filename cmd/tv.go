@@ -6,10 +6,9 @@ import (
 	"jing/internal/config"
 	"jing/internal/tv"
 	_ "jing/internal/tv/porn"
-	"jing/pkg/util"
-	"os"
 )
 
+// go run ./main.go tv -k porn -n caoliu
 var (
 	kind   string
 	name   string
@@ -41,23 +40,8 @@ func run0(kind string, name string) {
 	fmt.Println("search tv with " + kind + " " + name)
 	tvItem := config.ListTv(kind, name)
 	fmt.Println(tvItem)
-	result := tv.DoSearch(kind, tvItem)
+	tv.DoSearch(kind, tvItem)
 
-	writeOutput(result)
-}
-
-func writeOutput(arr []string) {
-	path := util.GetWorkDir() + "/" + output
-	f, err := os.Create(path)
-	defer f.Close()
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	for _, r := range arr {
-		f.WriteString(r + "\n")
-	}
-
+	//path := util.GetWorkDir() + "/" + output
+	//util.WriteOutput(path, result)
 }

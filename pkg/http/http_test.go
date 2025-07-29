@@ -25,3 +25,14 @@ func TestDownLoad(t *testing.T) {
 	context := Get(url, headers)
 	fmt.Println(context)
 }
+
+func TestGet(t *testing.T) {
+	url := "https://cl.vxn75q.info/htm_data/2504/25/6767204.html"
+	headers := map[string]string{
+		"cookie": "ismob=1",
+	}
+
+	context := Get(url, headers)
+	fmt.Println(context)
+
+}

@@ -26,42 +26,52 @@ type sortUrl struct {
 	sort int
 }
 
-func (s PornSearch) DoSearch(tv config.Tv) []string {
-	var result []string
-
+func (s PornSearch) DoSearch(tv config.Tv) {
 	switch tv.Name {
 	case "caoliu":
-		result = CaoliuSearch(tv)
+		CaoliuSearch(tv)
 		break
 	default:
 
 	}
 
-	return result
 }
 
-func CaoliuSearch(tv config.Tv) []string {
-	result := make([]string, 0, 100)
+func CaoliuSearch(tv config.Tv) {
 	sortUrls := make([]sortUrl, 0, 100)
 	for i := 1; i <= tv.MaxPage; i++ {
+		fmt.Println(i)
 		rs := SearchOnePage(tv, i)
 		sortUrls = append(sortUrls, rs...)
 	}
 
+	fmt.Println("total urls>>>>>>>>>>>>>>>> " + strconv.Itoa(len(sortUrls)))
 	sort.Slice(sortUrls, func(i, j int) bool {
 		return sortUrls[i].sort > sortUrls[j].sort
 	})
 
-	for _, s := range sortUrls {
-		fmt.Println(s)
-	}
-
+	downloadUrls := make([]string, 0, 100)
+	hashs := make([]string, 0, 100)
 	for i := 0; i < tv.DownloadSize && i < len(sortUrls); i++ {
-		d := getDownLoad(sortUrls[i].url, tv.Heads)
-		result = append(result, d)
+		tmp := getDownLoadHash(sortUrls[i].url, tv.Heads)
+		if tmp != "" {
+			hashs = append(hashs, tmp[3:])
+			downUrl := "https://www.rmdown.com/download.php?action=magnet&ref=" +
+				tmp +
+				"&reff=9"
+			downloadUrls = append(downloadUrls, downUrl)
+		}
 	}
+	path := util.GetWorkDir() + "/tmp/urls.txt"
+	hashPath := util.GetWorkDir() + "/tmp/hash.txt"
+	util.WriteOutput(hashPath, hashs)
+	util.WriteOutput(path, downloadUrls)
+	/*
+		for _, url := range downloadUrls {
+			getDownLoad(url, tv.Heads)
+		}
+	*/
 
-	return result
 }
 
 func SearchOnePage(tv config.Tv, page int) []sortUrl {
@@ -76,7 +86,7 @@ func SearchOnePage(tv config.Tv, page int) []sortUrl {
 		if h != "" {
 			text := http.GetText(node, "i", "class", "icon-dl")
 			downNum, _ := strconv.Atoi(util.GetPrefixNum(text))
-			if downNum > tv.DownloadNumLimit {
+			if downNum > tv.DownloadNumLimit*page {
 				h = tv.Domain + strings.Replace(h, "htm_mob", "htm_data", 1)
 				sortUrl := sortUrl{
 					h,
@@ -90,27 +100,50 @@ func SearchOnePage(tv config.Tv, page int) []sortUrl {
 	return sortUrls
 }
 
-func getDownLoad(url string, headers map[string]string) string {
-	result := ""
+func getDownLoadHash(url string, headers map[string]string) string {
+	fmt.Println(url)
 	context := http.Get(url, headers)
-	node := http.ParseHtml(context)
-	downPage := http.GetAttrWithAttrs(node, "a", "id", "rmlink", "href")
-	hash := strings.Split(downPage, "hash=")[1]
-	downUrl := "https://www.rmdown.com/download.php?action=magnet&ref=" +
-		hash +
-		"&reff=9"
-	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	hash := ""
+
+	if context != "" {
+		node := http.ParseHtml(context)
+		downPage := http.GetAttrWithAttrs(node, "a", "id", "rmlink", "href")
+		hash = strings.Split(downPage, "hash=")[1]
+	}
+	return hash
+
+}
+
+func getDownLoad(downUrl string, headers map[string]string) {
+	result := ""
+
+	//fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	fmt.Println(downUrl)
 	result = http.Get(downUrl, headers)
-	if strings.Contains(result, "error") {
+	if !strings.HasPrefix(result, "magnet") {
 		time.Sleep(10 * time.Second)
 		result = http.Get(downUrl, headers)
-		if strings.Contains(result, "error") {
-			time.Sleep(60 * time.Second)
+		for !strings.HasPrefix(result, "magnet") {
+			fmt.Println(downUrl)
+			fmt.Println("wait for operate mannually")
+			time.Sleep(30 * time.Second)
 			result = http.Get(downUrl, headers)
+
 		}
 	}
-	fmt.Println(result)
-	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-	return result
+	path := util.GetWorkDir() + "/tmp/result.txt"
+	util.AppendToFile(path, result)
+	//fmt.Println(result)
+	//fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+}
+
+func GetDownLoadFromFile() {
+	tv := config.ListTv(config.PornKind, "caoliu")
+	path := util.GetWorkDir() + "/tmp/urls.txt"
+	urls := util.ReadLinesFromFile(path)
+	for _, u := range urls {
+		getDownLoad(u, tv.Heads)
+	}
+	//util.PrintArrString(urls)
+
 }

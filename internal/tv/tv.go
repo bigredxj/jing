@@ -6,10 +6,10 @@ import (
 )
 
 type Search interface {
-	DoSearch(tv config.Tv) []string
+	DoSearch(tv config.Tv)
 }
 
-func DoSearch(kind string, tv config.Tv) []string {
+func DoSearch(kind string, tv config.Tv) {
 	f := register.GetTvFunc(kind)
-	return f(tv)
+	f(tv)
 }

@@ -1,9 +1,6 @@
 package util
 
-import (
-	"path/filepath"
-	"runtime"
-)
+import "fmt"
 
 func GetPrefixNum(s string) string {
 	if s == "" {
@@ -27,10 +24,9 @@ func IsNum(c int32) bool {
 	return b
 }
 
-func GetWorkDir() string {
-	_, b, _, _ := runtime.Caller(0)
-	d := filepath.Dir(b)
-	rootDir := filepath.Join(d, "../..") // 假设根目录在当前包的上一级目录
-	absRootDir, _ := filepath.Abs(rootDir)
-	return absRootDir
+func PrintArrString(arr []string) {
+	for _, a := range arr {
+		fmt.Println(a)
+	}
+
 }

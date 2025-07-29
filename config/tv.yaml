@@ -1,15 +1,13 @@
 - kind: porn
   name: caoliu
   domain: https://cl.vxn75q.info
-  url: https://cl.vxn75q.info/thread0806.php?fid=25&search=&page=<page>
-  downloadNumLimit: 1000
+#  url: https://cl.vxn75q.info/thread0806.php?fid=25&search=hot&page=<page>
+  url: https://cl.vxn75q.info/thread0806.php?fid=25&page=<page>
+  downloadNumLimit: 1
   downloadSize: 30
-  maxPage: 10
+  maxPage: 1
   homePrefix: /htm_mob
   heads:
     cookie: ismob=1
     User-Agent: a
 
-- kind: porn1
-  name: caoliu2
-  url: https://cl.vxn75q.info/thread0806.php?fid=25&search=&page={page}
